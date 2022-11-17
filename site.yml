@@ -1,0 +1,75 @@
+---
+
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: update repo cache (CentOS)
+    tags: always,update
+    yum:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "CentOS"
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+  - name: install apache and php packages on web_servers (CentOS)
+    tags: httpd,php,centos
+    yum:
+      name:
+        - httpd
+        - php
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: install GNU nano(small editor) on web_servers
+    tags: GNU,nano,centos
+    yum:
+      name: nano
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: start httpd (CentOS)
+    tags: apache,centos,httpd
+    service:
+      name: httpd
+      state: started
+      enabled: yes
+    when: ansible_distribution == "CentOS"
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+  - name: install mariadb Package (CentOS)
+    tags: maridb
+    yum:
+      name:
+        - mariadb-server
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: install mariadb Package (Ubuntu)
+    tags: apache2,mariadb,Ubuntu
+    apt:
+      name:
+       - apache2
+       - mariadb-server
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: install samba package
+    tags: samba
+    package:
+      name: samba-client
+      state: latest
